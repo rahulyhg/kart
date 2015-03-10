@@ -1,12 +1,12 @@
 var kart;
 
-jQuery(function($) {
-
-  kart = function($) {
+function setupKart($) {
+  
+  return {
       
-    this.apiUrl = "/?kart";
+    apiUrl: "/?kart",
     
-    this.api = function(resource, options, events) {
+    api: function(resource, options, events) {
       
       var resources = { read: "GET", create: "POST", update: "PUT", delete: "DELETE" };
       
@@ -17,17 +17,36 @@ jQuery(function($) {
          data: options,
          type: resources[resource],
          error: function(status, error) {
-           $.trigger("fail.api.kart",[status,error,this]);           
+           $(this).trigger("fail.api.kart",[status,error,this]);           
          },
          success: function(data, status) {
-           $.trigger("success.api.kart",[data,status,this]);
+           $(this).trigger("success.api.kart",[data,status,this]);
          }
-       })       
+       });       
       
-    };
-  
-    $.trigger("init.kart",[this]);
+    }
     
-  }($);
+  };
   
-});
+}
+
+//be smart: am I a node module or standalone?
+if (typeof require === "function") {  
+
+  jQuery = require("jquery");
+  
+  kart = setupKart(jQuery);
+      
+  module.exports = kart;  
+
+} else {
+  
+  jQuery(document).on("ready", function() {
+
+    kart = setupKart(jQuery);
+    $(kart).trigger("init.kart",[kart]);
+    
+  });
+  
+}
+
